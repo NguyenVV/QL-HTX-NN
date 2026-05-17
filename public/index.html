@@ -3,109 +3,315 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Hợp Tác Xã Nông Nghiệp</title>
+    <title>Hệ Thống Quản Lý Hợp Tác Xã Nông Nghiệp 4.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100 font-sans min-h-screen">
 
-    <!-- Header -->
-    <nav class="bg-green-600 text-white shadow-lg p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold"><i class="fa-solid fa-leaf mr-2"></i>Hợp Tác Xã 4.0</h1>
-            <span class="text-sm bg-green-700 px-3 py-1 rounded-full">Chuyên gia 15 năm kinh nghiệm</span>
-        </div>
-    </nav>
-
-    <div class="container mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        <!-- Module 1: Xuất Nhập Kho -->
-        <div class="bg-white p-6 rounded-xl shadow-md">
-            <h2 class="text-xl font-semibold mb-4 text-green-700 border-b pb-2"><i class="fa-solid fa-boxes-stacked mr-2"></i>Nhập / Xuất Hàng</h2>
-            <div class="space-y-4">
-                <select id="transType" class="w-full p-2 border rounded">
-                    <option value="IN">Nhập Hàng (Mua vào)</option>
-                    <option value="OUT">Xuất Hàng (Bán ra)</option>
-                </select>
-                <input type="text" id="prodName" placeholder="Tên sản phẩm (VD: Lúa ST25)" class="w-full p-2 border rounded">
-                <div class="flex gap-2">
-                    <input type="number" id="prodAmount" placeholder="Số lượng" class="w-1/2 p-2 border rounded">
-                    <input type="number" id="prodPrice" placeholder="Giá đơn vị" class="w-1/2 p-2 border rounded">
+    <div id="loginSection" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+            <div class="text-center mb-6">
+                <div class="bg-green-100 text-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-leaf text-3xl"></i>
                 </div>
-                <button onclick="saveTransaction()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded transition">Lưu Giao Dịch</button>
+                <h2 class="text-2xl font-bold text-gray-800">Hợp Tác Xã Nông Nghiệp</h2>
+                <p class="text-gray-500 text-sm">Vui lòng đăng nhập hệ thống</p>
             </div>
-        </div>
-
-        <!-- Module 2: Quản Lý Nhân Công -->
-        <div class="bg-white p-6 rounded-xl shadow-md">
-            <h2 class="text-xl font-semibold mb-4 text-blue-700 border-b pb-2"><i class="fa-solid fa-users mr-2"></i>Chấm Công Nhân Viên</h2>
             <div class="space-y-4">
-                <input type="text" id="workerName" placeholder="Họ tên công nhân" class="w-full p-2 border rounded">
-                <div class="flex gap-2">
-                    <input type="number" id="daysWorked" placeholder="Số ngày làm" class="w-1/2 p-2 border rounded">
-                    <input type="number" id="dailySalary" placeholder="Lương/Ngày" class="w-1/2 p-2 border rounded">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tài khoản</label>
+                    <input type="text" id="loginUser" placeholder="Tên đăng nhập (Ví dụ: admin)" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none">
                 </div>
-                <input type="month" id="workMonth" class="w-full p-2 border rounded">
-                <button onclick="saveLabor()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded transition">Ghi Nhận Công</button>
-            </div>
-        </div>
-
-        <!-- Module 3 & 4: Báo Cáo & Hệ Thống -->
-        <div class="bg-white p-6 rounded-xl shadow-md md:col-span-2">
-            <h2 class="text-xl font-semibold mb-4 text-purple-700 border-b pb-2"><i class="fa-solid fa-chart-line mr-2"></i>Báo Cáo & Kết Quả</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="p-4 bg-purple-50 rounded-lg text-center">
-                    <p class="text-gray-600">Hiệu quả tháng</p>
-                    <button onclick="downloadReport()" class="mt-2 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 w-full">
-                        <i class="fa-solid fa-file-excel mr-2"></i>Tải Báo Cáo Excel
-                    </button>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
+                    <input type="password" id="loginPass" placeholder="••••••••" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none">
                 </div>
-                <div class="p-4 bg-orange-50 rounded-lg text-center">
-                    <p class="text-gray-600">Phân quyền</p>
-                    <p class="text-sm text-gray-500 mt-2 italic">Đang hoạt động: <span class="font-bold text-orange-600">Quản trị viên</span></p>
-                </div>
-                <div class="p-4 bg-gray-50 rounded-lg text-center">
-                    <p class="text-gray-600">Trạng thái hệ thống</p>
-                    <p class="text-green-600 font-bold mt-2"><i class="fa-solid fa-circle-check"></i> Đang kết nối PC</p>
-                </div>
+                <button onclick="handleLogin()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition shadow-lg">Đăng Nhập <i class="fa-solid fa-arrow-right-to-bracket ml-2"></i></button>
             </div>
         </div>
     </div>
 
-    <script>
-        async function saveTransaction() {
-            const data = {
-                product_id: 1, // Để đơn giản hóa, em fix cứng ID hoặc anh có thể làm thêm list chọn
-                amount: document.getElementById('prodAmount').value,
-                price: document.getElementById('prodPrice').value,
-                type: document.getElementById('transType').value
-            };
+    <div id="mainDashboard" class="hidden">
+        <nav class="bg-green-700 text-white shadow-md p-4">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-wheat-awn text-2xl"></i>
+                    <span class="text-xl font-bold tracking-wide">HTX ĐỒNG TIẾN 4.0</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm font-semibold" id="navUsername">Xin chào: --</p>
+                        <p class="text-xs bg-green-800 px-2 py-0.5 rounded-md inline-block text-yellow-300 font-bold" id="navRole">Quyền: --</p>
+                    </div>
+                    <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl text-sm transition font-medium">
+                        <i class="fa-solid fa-power-off"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mx-auto p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            const res = await fetch('/inventory/transaction', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            });
-            if(res.ok) alert('Đã lưu giao dịch kho!');
+            <div id="modInventory" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-lg font-bold mb-4 text-green-700 flex items-center"><i class="fa-solid fa-boxes-stacked mr-2"></i>Nhập / Xuất Hàng Hóa</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Loại hình giao dịch</label>
+                        <select id="transType" class="w-full p-2.5 border rounded-xl bg-gray-50 font-medium">
+                            <option value="IN">Nhập Hàng (Thu mua vào kho)</option>
+                            <option value="OUT">Xuất Hàng (Bán ra thị trường)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Mã sản phẩm đối chiếu</label>
+                        <input type="number" id="prodId" placeholder="Nhập ID sản phẩm (Ví dụ: 1)" class="w-full p-2.5 border rounded-xl">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Số lượng</label>
+                            <input type="number" id="prodAmount" placeholder="0.00" class="w-full p-2.5 border rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Giá thành (đơn vị)</label>
+                            <input type="number" id="prodPrice" placeholder="VNĐ" class="w-full p-2.5 border rounded-xl">
+                        </div>
+                    </div>
+                    <button onclick="saveTransaction()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-xl transition">Lưu Giao Dịch Kho</button>
+                </div>
+            </div>
+
+            <div id="modLabor" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-lg font-bold mb-4 text-blue-700 flex items-center"><i class="fa-solid fa-id-card-clip mr-2"></i>Chấm Công & Tính Lương</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Họ và tên người lao động</label>
+                        <input type="text" id="workerName" placeholder="Nhập họ tên công nhân" class="w-full p-2.5 border rounded-xl">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Số ngày làm việc thực tế</label>
+                            <input type="number" id="daysWorked" placeholder="Ví dụ: 26" class="w-full p-2.5 border rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Mức lương / Ngày công</label>
+                            <input type="number" id="dailySalary" placeholder="VNĐ (Ví dụ: 300000)" class="w-full p-2.5 border rounded-xl">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Kỳ chấm công (Tháng)</label>
+                        <input type="month" id="workMonth" class="w-full p-2.5 border rounded-xl bg-gray-50">
+                    </div>
+                    <button onclick="saveLabor()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition">Ghi Nhận Ngày Công</button>
+                </div>
+            </div>
+
+            <div id="modReports" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
+                <h2 class="text-lg font-bold mb-4 text-purple-700 flex items-center"><i class="fa-solid fa-chart-pie mr-2"></i>Trung Tâm Dữ Liệu Báo Cáo Hiệu Quả Hoạt Động Lỗ Lãi</h2>
+                <div class="p-4 bg-purple-50 rounded-xl mb-4 border border-purple-100">
+                    <p class="text-sm text-gray-600 leading-relaxed mb-3">
+                        <i class="fa-solid fa-circle-info text-purple-500 mr-1"></i> Hệ thống tự động tổng hợp toán bộ chứng từ xuất nhập kho và bảng tính lương nhân công theo thời gian thực để phân tích cán cân dòng tiền.
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="downloadReport()" class="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm transition flex items-center">
+                            <i class="fa-solid fa-file-excel mr-2 text-base"></i> Tải Báo Cáo Quyết Toán Định Dạng Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modAdminUsers" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2 hidden">
+                <h2 class="text-lg font-bold mb-4 text-orange-700 flex items-center"><i class="fa-solid fa-user-gear mr-2"></i>Cấp Tài Khoản Hệ Thống & Phân Quyền Quản Trị</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-1 space-y-3 bg-orange-50 p-4 rounded-xl border border-orange-100">
+                        <h3 class="text-xs font-bold text-orange-800 uppercase tracking-wider mb-2">Cấp tài khoản mới</h3>
+                        <input type="text" id="regUser" placeholder="Tên đăng nhập mới" class="w-full p-2 border rounded-xl text-sm bg-white">
+                        <input type="password" id="regPass" placeholder="Mật khẩu thiết lập" class="w-full p-2 border rounded-xl text-sm bg-white">
+                        <select id="regRole" class="w-full p-2 border rounded-xl text-sm bg-white font-medium">
+                            <option value="Thủ kho">Thủ kho (Chỉ nhập/xuất kho)</option>
+                            <option value="Kế toán">Kế toán (Chấm công & Xem báo cáo)</option>
+                            <option value="Admin">Admin (Toàn quyền quản trị hệ thống)</option>
+                        </select>
+                        <button onclick="createUserAccount()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 rounded-xl text-sm transition">Cấp Quyền Truy Cập</button>
+                    </div>
+                    <div class="md:col-span-2">
+                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Danh sách thành viên quản trị vận hành</h3>
+                        <div class="overflow-x-auto rounded-xl border border-gray-200">
+                            <table class="w-full text-left border-collapse text-sm bg-white">
+                                <thead class="bg-gray-100 font-semibold text-gray-700 border-b">
+                                    <tr>
+                                        <th class="p-3">ID</th>
+                                        <th class="p-3">Tài Khoản</th>
+                                        <th class="p-3">Quyền Hạn Hệ Thống</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userTableBody" class="divide-y text-gray-600">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Hàm chạy tự động kiểm tra xem trình duyệt đã lưu token đăng nhập chưa
+        window.onload = function() {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('role');
+            const username = localStorage.getItem('username');
+            if(token && role && username) {
+                showDashboard(token, role, username);
+            }
         }
 
+        // Xử lý sự kiện đăng nhập tài khoản
+        async function handleLogin() {
+            const username = document.getElementById('loginUser').value;
+            const password = document.getElementById('loginPass').value;
+
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if(data.success) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('role', data.role);
+                localStorage.setItem('username', data.username);
+                showDashboard(data.token, data.role, data.username);
+            } else {
+                alert('Đăng nhập thất bại: ' + data.error);
+            }
+        }
+
+        // Bật hiển thị giao diện phân quyền tương ứng
+        function showDashboard(token, role, username) {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('mainDashboard').classList.remove('hidden');
+            document.getElementById('navUsername').innerText = `Xin chào: ${username}`;
+            document.getElementById('navRole').innerText = `Quyền: ${role}`;
+
+            // Reset trạng thái ẩn hiện các cấu trúc module theo vai trò người dùng (RBAC)
+            document.getElementById('modAdminUsers').classList.add('hidden');
+            
+            if(role === 'Admin') {
+                document.getElementById('modAdminUsers').classList.remove('hidden');
+                loadUserList(token);
+            }
+        }
+
+        // Đăng xuất xóa phiên làm việc
+        function handleLogout() {
+            localStorage.clear();
+            window.location.reload();
+        }
+
+        // Gửi thông tin Giao dịch Kho (Module 1)
+        async function saveTransaction() {
+            const token = localStorage.getItem('token');
+            const data = {
+                product_id: parseInt(document.getElementById('prodId').value),
+                amount: parseFloat(document.getElementById('prodAmount').value),
+                price: parseFloat(document.getElementById('prodPrice').value),
+                type: document.getElementById('transType').value
+            };
+            const res = await fetch('/inventory/transaction', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if(res.ok) {
+                alert('Thành công: Đã đồng bộ số liệu kho hàng lên Supabase!');
+            } else {
+                alert('Lỗi phân quyền hoặc dữ liệu: ' + result.error);
+            }
+        }
+
+        // Gửi thông tin Chấm công Nhân công (Module 2)
         async function saveLabor() {
+            const token = localStorage.getItem('token');
             const data = {
                 name: document.getElementById('workerName').value,
-                days_worked: document.getElementById('daysWorked').value,
-                salary_per_day: document.getElementById('dailySalary').value,
+                days_worked: parseInt(document.getElementById('daysWorked').value),
+                salary_per_day: parseFloat(document.getElementById('dailySalary').value),
                 month: document.getElementById('workMonth').value
             };
             const res = await fetch('/labor/update', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
                 body: JSON.stringify(data)
             });
-            if(res.ok) alert('Đã chấm công xong!');
+            const result = await res.json();
+            if(res.ok) {
+                alert('Thành công: Đã chốt số ngày công lao động!');
+            } else {
+                alert('Từ chối thao tác: ' + result.error);
+            }
         }
 
+        // Tải báo cáo Excel (Module 3)
         function downloadReport() {
-            window.location.href = '/report/excel';
+            const token = localStorage.getItem('token');
+            // Truyền token qua query string để định danh tải file trực tiếp từ Browser
+            window.location.href = `/report/excel?token=${token}`;
+        }
+
+        // Quản lý Account: Tải danh sách tài khoản hiện hữu (Module 4)
+        async function loadUserList(token) {
+            const res = await fetch('/api/users/list', {
+                headers: {'Authorization': 'Bearer ' + token}
+            });
+            const data = await res.json();
+            if(data.success) {
+                const tbody = document.getElementById('userTableBody');
+                tbody.innerHTML = '';
+                data.users.forEach(u => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="p-3 font-medium">${u.id}</td>
+                            <td class="p-3">${u.username}</td>
+                            <td class="p-3"><span class="px-2 py-1 rounded-md text-xs font-bold ${u.role === 'Admin' ? 'bg-orange-100 text-orange-700' : u.role === 'Kế toán' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}">${u.role}</span></td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        // Quản lý Account: Tạo người dùng quản lý mới (Module 4)
+        async function createUserAccount() {
+            const token = localStorage.getItem('token');
+            const username = document.getElementById('regUser').value;
+            const password = document.getElementById('regPass').value;
+            const role = document.getElementById('regRole').value;
+
+            const res = await fetch('/api/users/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ username, password, role })
+            });
+            const data = await res.json();
+            if(data.success) {
+                alert('Đã cấp quyền và tạo tài khoản quản trị mới thành công!');
+                document.getElementById('regUser').value = '';
+                document.getElementById('regPass').value = '';
+                loadUserList(token); // Tải lại bảng ngay lập tức
+            } else {
+                alert('Lỗi: ' + data.error);
+            }
         }
     </script>
 </body>
