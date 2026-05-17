@@ -37,7 +37,7 @@
             <div class="container mx-auto flex justify-between items-center">
                 <div class="flex items-center space-x-2">
                     <i class="fa-solid fa-wheat-awn text-2xl"></i>
-                    <span class="text-xl font-bold tracking-wide">HTX ĐỒNG TIẾN 4.0</span>
+                    <span class="text-xl font-bold tracking-wide">HTX YÊN PHÚ 4.0</span>
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="text-right">
@@ -64,8 +64,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Mã sản phẩm đối chiếu</label>
-                        <input type="number" id="prodId" placeholder="Nhập ID sản phẩm (Ví dụ: 1)" class="w-full p-2.5 border rounded-xl">
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Mã hàng hóa (ID)</label>
+                        <input type="number" id="prodId" placeholder="Mã số mặt hàng (Ví dụ: 1)" class="w-full p-2.5 border rounded-xl">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -73,7 +73,7 @@
                             <input type="number" id="prodAmount" placeholder="0.00" class="w-full p-2.5 border rounded-xl">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Giá thành (đơn vị)</label>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Giá thành đơn vị (VNĐ)</label>
                             <input type="number" id="prodPrice" placeholder="VNĐ" class="w-full p-2.5 border rounded-xl">
                         </div>
                     </div>
@@ -94,7 +94,7 @@
                             <input type="number" id="daysWorked" placeholder="Ví dụ: 26" class="w-full p-2.5 border rounded-xl">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Mức lương / Ngày công</label>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Mức lương / Ngày công (VNĐ)</label>
                             <input type="number" id="dailySalary" placeholder="VNĐ (Ví dụ: 300000)" class="w-full p-2.5 border rounded-xl">
                         </div>
                     </div>
@@ -106,11 +106,75 @@
                 </div>
             </div>
 
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-1">
+                <h2 class="text-lg font-bold mb-4 text-blue-800 flex items-center justify-between">
+                    <span><i class="fa-solid fa-clipboard-list mr-2"></i>Lịch Sử Chấm Công</span>
+                </h2>
+                <div class="mb-3 flex gap-2">
+                    <input type="text" id="searchLaborName" placeholder="🔍 Nhập họ tên công nhân để tìm..." class="w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="fetchLaborHistory()" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-xl text-sm font-bold hover:bg-blue-200">Tìm</button>
+                </div>
+                <div class="overflow-y-auto max-h-64 rounded-xl border border-gray-200">
+                    <table class="w-full text-left text-xs bg-white">
+                        <thead class="bg-gray-100 font-semibold text-gray-700 border-b sticky top-0">
+                            <tr>
+                                <th class="p-2.5">Họ Tên</th>
+                                <th class="p-2.5">Tháng</th>
+                                <th class="p-2.5 text-center">Số Ngày</th>
+                                <th class="p-2.5 text-right">Lương/Ngày</th>
+                                <th class="p-2.5 text-right font-bold">Thành Tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody id="laborHistoryBody" class="divide-y text-gray-600"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-1">
+                <h2 class="text-lg font-bold mb-4 text-green-800 flex items-center">
+                    <span><i class="fa-solid fa-clock-history mr-2"></i>Lịch Sử Nhật Ký Kho</span>
+                </h2>
+                <div class="mb-3 grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase">Lọc Theo Ngày</label>
+                        <input type="date" id="filterDate" onchange="fetchTransactionHistory()" class="w-full p-1.5 text-xs border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase">Lọc Theo Tháng</label>
+                        <input type="month" id="filterMonth" onchange="fetchTransactionHistory()" class="w-full p-1.5 text-xs border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase">Lọc Theo Năm</label>
+                        <select id="filterYear" onchange="fetchTransactionHistory()" class="w-full p-1.5 text-xs border rounded-lg font-medium">
+                            <option value="">-- Chọn Năm --</option>
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="overflow-y-auto max-h-64 rounded-xl border border-gray-200">
+                    <table class="w-full text-left text-xs bg-white">
+                        <thead class="bg-gray-100 font-semibold text-gray-700 border-b sticky top-0">
+                            <tr>
+                                <th class="p-2.5">Ngày</th>
+                                <th class="p-2.5 text-center">Mã SP</th>
+                                <th class="p-2.5">Hình Thức</th>
+                                <th class="p-2.5 text-center">SL</th>
+                                <th class="p-2.5 text-right">Đơn Giá</th>
+                                <th class="p-2.5 text-right font-bold">Tổng Giá Trị</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transHistoryBody" class="divide-y text-gray-600"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <div id="modReports" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
                 <h2 class="text-lg font-bold mb-4 text-purple-700 flex items-center"><i class="fa-solid fa-chart-pie mr-2"></i>Trung Tâm Dữ Liệu Báo Cáo Hiệu Quả Hoạt Động Lỗ Lãi</h2>
                 <div class="p-4 bg-purple-50 rounded-xl mb-4 border border-purple-100">
                     <p class="text-sm text-gray-600 leading-relaxed mb-3">
-                        <i class="fa-solid fa-circle-info text-purple-500 mr-1"></i> Hệ thống tự động tổng hợp toán bộ chứng từ xuất nhập kho và bảng tính lương nhân công theo thời gian thực để phân tích cán cân dòng tiền.
+                        <i class="fa-solid fa-circle-info text-purple-500 mr-1"></i> Hệ thống tự động kết xuất chứng từ định dạng báo cáo kế toán. Vui lòng bấm nút dưới để tải tệp quyết toán định kỳ.
                     </p>
                     <div class="flex flex-wrap gap-3">
                         <button onclick="downloadReport()" class="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm transition flex items-center">
@@ -135,7 +199,7 @@
                         <button onclick="createUserAccount()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 rounded-xl text-sm transition">Cấp Quyền Truy Cập</button>
                     </div>
                     <div class="md:col-span-2">
-                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Danh sách thành viên quản trị vận hành</h3>
+                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Danh sách thành viên điều hành</h3>
                         <div class="overflow-x-auto rounded-xl border border-gray-200">
                             <table class="w-full text-left border-collapse text-sm bg-white">
                                 <thead class="bg-gray-100 font-semibold text-gray-700 border-b">
@@ -145,8 +209,7 @@
                                         <th class="p-3">Quyền Hạn Hệ Thống</th>
                                     </tr>
                                 </thead>
-                                <tbody id="userTableBody" class="divide-y text-gray-600">
-                                    </tbody>
+                                <tbody id="userTableBody" class="divide-y text-gray-600"></tbody>
                             </table>
                         </div>
                     </div>
@@ -157,7 +220,12 @@
     </div>
 
     <script>
-        // Hàm chạy tự động kiểm tra xem trình duyệt đã lưu token đăng nhập chưa
+        // Hàm định dạng số chuyên nghiệp: 100000 -> 100.000
+        function formatVNNumber(num) {
+            if (num === null || num === undefined || isNaN(num)) return "0";
+            return Number(num).toLocaleString('de-DE');
+        }
+
         window.onload = function() {
             const token = localStorage.getItem('token');
             const role = localStorage.getItem('role');
@@ -167,11 +235,9 @@
             }
         }
 
-        // Xử lý sự kiện đăng nhập tài khoản
         async function handleLogin() {
             const username = document.getElementById('loginUser').value;
             const password = document.getElementById('loginPass').value;
-
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -188,29 +254,89 @@
             }
         }
 
-        // Bật hiển thị giao diện phân quyền tương ứng
         function showDashboard(token, role, username) {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('mainDashboard').classList.remove('hidden');
             document.getElementById('navUsername').innerText = `Xin chào: ${username}`;
             document.getElementById('navRole').innerText = `Quyền: ${role}`;
 
-            // Reset trạng thái ẩn hiện các cấu trúc module theo vai trò người dùng (RBAC)
             document.getElementById('modAdminUsers').classList.add('hidden');
-            
             if(role === 'Admin') {
                 document.getElementById('modAdminUsers').classList.remove('hidden');
                 loadUserList(token);
             }
+            
+            // Tải dữ liệu ban đầu cho các trang danh sách
+            fetchLaborHistory();
+            fetchTransactionHistory();
         }
 
-        // Đăng xuất xóa phiên làm việc
         function handleLogout() {
             localStorage.clear();
             window.location.reload();
         }
 
-        // Gửi thông tin Giao dịch Kho (Module 1)
+        // TẢI & TÌM KIẾM CHẤM CÔNG
+        async function fetchLaborHistory() {
+            const token = localStorage.getItem('token');
+            const searchName = document.getElementById('searchLaborName').value;
+            const url = `/api/labor/history?search=${encodeURIComponent(searchName)}`;
+            
+            const res = await fetch(url, { headers: {'Authorization': 'Bearer ' + token} });
+            const data = await res.json();
+            if(data.success) {
+                const tbody = document.getElementById('laborHistoryBody');
+                tbody.innerHTML = '';
+                data.history.forEach(l => {
+                    const totalSalary = l.salary_per_day * l.days_worked;
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="p-2.5 font-medium text-gray-800">${l.name}</td>
+                            <td class="p-2.5">${l.month}</td>
+                            <td class="p-2.5 text-center">${l.days_worked}</td>
+                            <td class="p-2.5 text-right">${formatVNNumber(l.salary_per_day)}</td>
+                            <td class="p-2.5 text-right font-bold text-blue-600">${formatVNNumber(totalSalary)}</td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        // TẢI & LỌC NHẬT KÝ KHO HÀNG
+        async function fetchTransactionHistory() {
+            const token = localStorage.getItem('token');
+            const date = document.getElementById('filterDate').value;
+            const month = document.getElementById('filterMonth').value;
+            const year = document.getElementById('filterYear').value;
+
+            let queryParams = [];
+            if (date) queryParams.push(`date=${date}`);
+            if (month) queryParams.push(`month=${month}`);
+            if (year) queryParams.push(`year=${year}`);
+            const url = `/api/inventory/history?${queryParams.join('&')}`;
+
+            const res = await fetch(url, { headers: {'Authorization': 'Bearer ' + token} });
+            const data = await res.json();
+            if(data.success) {
+                const tbody = document.getElementById('transHistoryBody');
+                tbody.innerHTML = '';
+                data.history.forEach(t => {
+                    const totalValue = t.amount * t.price;
+                    const cleanDate = new Date(t.date).toLocaleDateString('vi-VN');
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="p-2.5 text-gray-500">${cleanDate}</td>
+                            <td class="p-2.5 text-center font-bold text-gray-700">${t.product_id}</td>
+                            <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${t.type === 'IN' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${t.type === 'IN' ? 'NHẬP' : 'XUẤT'}</span></td>
+                            <td class="p-2.5 text-center font-semibold">${formatVNNumber(t.amount)}</td>
+                            <td class="p-2.5 text-right">${formatVNNumber(t.price)}</td>
+                            <td class="p-2.5 text-right font-bold ${t.type === 'IN' ? 'text-gray-700' : 'text-green-600'}">${formatVNNumber(totalValue)}</td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
         async function saveTransaction() {
             const token = localStorage.getItem('token');
             const data = {
@@ -221,21 +347,18 @@
             };
             const res = await fetch('/inventory/transaction', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
+                headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
                 body: JSON.stringify(data)
             });
-            const result = await res.json();
             if(res.ok) {
                 alert('Thành công: Đã đồng bộ số liệu kho hàng lên Supabase!');
+                fetchTransactionHistory(); // Refresh bảng kho
             } else {
-                alert('Lỗi phân quyền hoặc dữ liệu: ' + result.error);
+                const result = await res.json();
+                alert('Lỗi: ' + result.error);
             }
         }
 
-        // Gửi thông tin Chấm công Nhân công (Module 2)
         async function saveLabor() {
             const token = localStorage.getItem('token');
             const data = {
@@ -246,32 +369,25 @@
             };
             const res = await fetch('/labor/update', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
+                headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
                 body: JSON.stringify(data)
             });
-            const result = await res.json();
             if(res.ok) {
                 alert('Thành công: Đã chốt số ngày công lao động!');
+                fetchLaborHistory(); // Refresh bảng lương
             } else {
-                alert('Từ chối thao tác: ' + result.error);
+                const result = await res.json();
+                alert('Lỗi: ' + result.error);
             }
         }
 
-        // Tải báo cáo Excel (Module 3)
         function downloadReport() {
             const token = localStorage.getItem('token');
-            // Truyền token qua query string để định danh tải file trực tiếp từ Browser
             window.location.href = `/report/excel?token=${token}`;
         }
 
-        // Quản lý Account: Tải danh sách tài khoản hiện hữu (Module 4)
         async function loadUserList(token) {
-            const res = await fetch('/api/users/list', {
-                headers: {'Authorization': 'Bearer ' + token}
-            });
+            const res = await fetch('/api/users/list', { headers: {'Authorization': 'Bearer ' + token} });
             const data = await res.json();
             if(data.success) {
                 const tbody = document.getElementById('userTableBody');
@@ -288,27 +404,22 @@
             }
         }
 
-        // Quản lý Account: Tạo người dùng quản lý mới (Module 4)
         async function createUserAccount() {
             const token = localStorage.getItem('token');
             const username = document.getElementById('regUser').value;
             const password = document.getElementById('regPass').value;
             const role = document.getElementById('regRole').value;
-
             const res = await fetch('/api/users/register', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
+                headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
                 body: JSON.stringify({ username, password, role })
             });
             const data = await res.json();
             if(data.success) {
-                alert('Đã cấp quyền và tạo tài khoản quản trị mới thành công!');
+                alert('Đã tạo tài khoản quản trị mới thành công!');
                 document.getElementById('regUser').value = '';
                 document.getElementById('regPass').value = '';
-                loadUserList(token); // Tải lại bảng ngay lập tức
+                loadUserList(token);
             } else {
                 alert('Lỗi: ' + data.error);
             }

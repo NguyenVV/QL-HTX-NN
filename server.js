@@ -20,7 +20,7 @@ const pool = new Pool({
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- TỰ ĐỘNG KHỞI TẠO CẤU TRÚC BẢNG HỆ THỐNG ---
+// TỰ ĐỘNG ĐỒNG BỘ CẤU TRÚC HỆ THỐNG BẢNG
 const initDatabase = async () => {
     try {
         await pool.query(`
@@ -39,29 +39,29 @@ const initDatabase = async () => {
         if (parseInt(userRes.rows[0].count) === 0) {
             const hashedPwd = await bcrypt.hash('admin123', 10);
             await pool.query('INSERT INTO users (username, password, role) VALUES ($1, $2, $3)', ['admin', hashedPwd, 'Admin']);
-            console.log("ℹ️ Đã tạo tài khoản mặc định: admin / admin123");
+            console.log("ℹ️ Đã khởi tạo Admin tối cao thành công!");
         }
-        console.log("👉 Đồng bộ cấu trúc Database HTX thành công!");
+        console.log("👉 Cơ sở dữ liệu HTX đã sẵn sàng thông suốt!");
     } catch (err) {
-        console.error("❌ Lỗi khởi tạo Database:", err.message);
+        console.error("❌ Lỗi cấu trúc Database:", err.message);
     }
 };
 initDatabase();
 
-// --- MIDDWARE XÁC THỰC QUYỀN TRUY CẬP TOKEN ---
+// MIDDWARE XÁC THỰC AN TOÀN
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) return res.status(401).json({ success: false, error: "Chưa đăng nhập!" });
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ success: false, error: "Phiên đăng nhập hết hạn!" });
+        if (err) return res.status(403).json({ success: false, error: "Hết hạn phiên đăng nhập!" });
         req.user = user;
         next();
     });
 };
 
-// --- MODULE 4: XÁC THỰC & QUẢN LÝ TÀI KHOẢN MÀN HÌNH ADMIN ---
+// --- API AUTHENTICATION & USERS ---
 app.post('/api/auth/login', async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -80,19 +80,19 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 app.post('/api/users/register', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'Admin') return res.status(403).json({ success: false, error: "Chỉ đặc quyền Admin mới có thể cấp tài khoản!" });
+    if (req.user.role !== 'Admin') return res.status(403).json({ success: false, error: "Từ chối: Quyền Admin cấp cao!" });
     const { username, password, role } = req.body;
     try {
         const hashedPwd = await bcrypt.hash(password, 10);
         await pool.query('INSERT INTO users (username, password, role) VALUES ($1, $2, $3)', [username, hashedPwd, role]);
-        res.status(200).json({ success: true, message: "Tạo tài khoản thành công!" });
+        res.status(200).json({ success: true });
     } catch (err) {
-        res.status(500).json({ success: false, error: "Tài khoản quản trị này đã tồn tại!" });
+        res.status(500).json({ success: false, error: "Tài khoản đã tồn tại!" });
     }
 });
 
 app.get('/api/users/list', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'Admin') return res.status(403).json({ success: false, error: "Từ chối truy cập danh sách bảo mật!" });
+    if (req.user.role !== 'Admin') return res.status(403).json({ success: false, error: "Từ chối phân quyền!" });
     try {
         const result = await pool.query('SELECT id, username, role FROM users ORDER BY id ASC');
         res.status(200).json({ success: true, users: result.rows });
@@ -101,9 +101,63 @@ app.get('/api/users/list', authenticateToken, async (req, res) => {
     }
 });
 
-// --- MODULE 1: QUẢN LÝ XUẤT NHẬP KHO CHUẨN TRANSACTION Pooler ---
+// --- API TRA CỨU LỊCH SỬ CHẤM CÔNG (TÌM KIẾM) ---
+app.get('/api/labor/history', authenticateToken, async (req, res) => {
+    const { search } = req.query;
+    try {
+        let queryStr = 'SELECT * FROM labor';
+        let params = [];
+        
+        if (search) {
+            queryStr += ' WHERE name ILIKE $1';
+            params.push(`%${search}%`); // Tìm kiếm không phân biệt chữ hoa chữ thường
+        }
+        queryStr += ' ORDER BY month DESC, id DESC';
+        
+        const result = await pool.query(queryStr, params);
+        res.status(200).json({ success: true, history: result.rows });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// --- API TRA CỨU NHẬT KÝ KHO (FILTER NGÀY/THÁNG/NĂM) ---
+app.get('/api/inventory/history', authenticateToken, async (req, res) => {
+    const { date, month, year } = req.query;
+    try {
+        let queryStr = 'SELECT * FROM transactions WHERE 1=1';
+        let params = [];
+        let index = 1;
+
+        if (date) {
+            queryStr += ` AND date = $${index}`;
+            params.push(date);
+            index++;
+        }
+        if (month) {
+            // Mẫu chuỗi month: "2026-05" -> Tách lấy năm và tháng
+            const [mYear, mMonth] = month.split('-');
+            queryStr += ` AND EXTRACT(YEAR FROM date) = $${index} AND EXTRACT(MONTH FROM date) = $${index+1}`;
+            params.push(mYear, mMonth);
+            index += 2;
+        }
+        if (year && !month) { // Nếu đã chọn tháng thì ưu tiên tháng trước
+            queryStr += ` AND EXTRACT(YEAR FROM date) = $${index}`;
+            params.push(year);
+            index++;
+        }
+
+        queryStr += ' ORDER BY date DESC, id DESC';
+        const result = await pool.query(queryStr, params);
+        res.status(200).json({ success: true, history: result.rows });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// --- NGHIỆP VỤ KHO & CHẤM CÔNG ---
 app.post('/inventory/transaction', authenticateToken, async (req, res) => {
-    if (req.user.role === 'Kế toán') return res.status(403).json({ success: false, error: "Kế toán không được quyền can thiệp sửa kho!" });
+    if (req.user.role === 'Kế toán') return res.status(403).json({ success: false, error: "Chức năng bị chặn với Kế toán!" });
     const { product_id, amount, price, type } = req.body;
     const client = await pool.connect();
     try {
@@ -112,7 +166,7 @@ app.post('/inventory/transaction', authenticateToken, async (req, res) => {
         const adjustValue = type === 'IN' ? amount : -amount;
         await client.query('INSERT INTO inventory (id, name, quantity) VALUES ($1, $2, $3) ON CONFLICT (id) DO UPDATE SET quantity = inventory.quantity + $4', [product_id, 'Nông sản mã số ' + product_id, adjustValue, adjustValue]);
         await client.query('COMMIT');
-        res.status(200).json({ success: true, message: "Cập nhật kho thành công!" });
+        res.status(200).json({ success: true, message: "Thành công!" });
     } catch (err) {
         await client.query('ROLLBACK');
         res.status(500).json({ success: false, error: err.message });
@@ -121,26 +175,24 @@ app.post('/inventory/transaction', authenticateToken, async (req, res) => {
     }
 });
 
-// --- MODULE 2: QUẢN LÝ NHÂN CÔNG ---
 app.post('/labor/update', authenticateToken, async (req, res) => {
-    if (req.user.role === 'Thủ kho') return res.status(403).json({ success: false, error: "Thủ kho không được quyền chấm công!" });
+    if (req.user.role === 'Thủ kho') return res.status(403).json({ success: false, error: "Chức năng bị chặn với Thủ kho!" });
     const { name, salary_per_day, days_worked, month } = req.body;
     try {
         await pool.query('INSERT INTO labor (name, salary_per_day, days_worked, month) VALUES ($1, $2, $3, $4)', [name, salary_per_day, days_worked, month]);
-        res.status(200).json({ success: true, message: "Ghi nhận lương thành công!" });
+        res.status(200).json({ success: true });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
-// --- MODULE 3: TRANG XEM THÔNG TIN BÁO CÁO & XUẤT EXCEL KẾT QUẢ ĐỊNH KỲ ---
+// --- MODULE 3: XUẤT EXCEL BÁO CÁO ---
 app.get('/report/excel', async (req, res) => {
     const token = req.query.token;
-    if (!token) return res.status(401).send("Từ chối: Chưa xác thực danh tính!");
-    
+    if (!token) return res.status(401).send("Chưa xác thực quyền truy cập!");
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
-        if (decoded.role === 'Thủ kho') return res.status(403).send("Quyền thủ kho không thể truy xuất báo cáo tài chính!");
+        if (decoded.role === 'Thủ kho') return res.status(403).send("Quyền thủ kho bị chặn xem tài chính!");
 
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Báo Cáo Quyết Toán');
@@ -162,7 +214,6 @@ app.get('/report/excel', async (req, res) => {
 
         const laborData = await pool.query('SELECT SUM(salary_per_day * days_worked) as total FROM labor');
         const totalLaborCost = parseFloat(laborData.rows[0].total) || 0;
-
         const netProfit = revenue - cogs - totalLaborCost;
 
         sheet.addRow({ desc: '1. Doanh thu bán hàng nông sản xuất kho (+)', amount: revenue });
@@ -177,8 +228,8 @@ app.get('/report/excel', async (req, res) => {
         await workbook.xlsx.write(res);
         res.end();
     } catch (err) {
-        res.status(500).send("Lỗi xử lý hệ thống: " + err.message);
+        res.status(500).send("Lỗi xử lý: " + err.message);
     }
 });
 
-app.listen(PORT, () => console.log(`🚀 Hệ thống HTX hoạt động tại cổng: ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Hệ thống HTX chạy mượt mà tại cổng: ${PORT}`));
