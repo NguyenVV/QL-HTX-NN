@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 // Sử dụng biến môi trường DATABASE_URL để bảo mật thông tin kết nối
 // Nếu chạy local, anh có thể dán trực tiếp chuỗi kết nối Supabase vào đây để test
 // Hệ thống sẽ ưu tiên lấy từ biến môi trường DATABASE_URL trên Render để bảo mật
-const connectionString = process.env.DATABASE_URL || "postgresql://postgres:MAT_KHAU_MAU_VI_DU@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres?pgbouncer=true";
+const connectionString = process.env.DATABASE_URL || "postgresql://postgres.juvaurqgmtxyzylkehlw:[YOUR-PASSWORD]@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres;
 
 const pool = new Pool({
   connectionString: connectionString,
